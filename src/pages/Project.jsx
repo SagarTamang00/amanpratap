@@ -107,8 +107,8 @@ const VideoCard = ({ project, onOpen, isDouble }) => {
             className={`relative cursor-pointer overflow-hidden w-full ${isDouble ? 'md:flex-1 aspect-video' : 'md:w-full aspect-video'}`}
             style={{
                 borderRadius: '16px',
-                background: '#0d0b09',
-                border: `1px solid ${hovered ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}`,
+                background: 'transparent',
+                border: '1px solid rgba(201,168,76,0.12)',
                 boxShadow: hovered
                     ? '0 24px 64px rgba(0,0,0,0.8), 0 0 40px rgba(201,168,76,0.1)'
                     : '0 8px 32px rgba(0,0,0,0.5)',
