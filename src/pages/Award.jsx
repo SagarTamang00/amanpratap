@@ -73,7 +73,6 @@ const styles = `
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: ${COLORS.bg};
   padding: 5rem 0;
   font-family: ${FONT_BODY};
   color: ${COLORS.fg};

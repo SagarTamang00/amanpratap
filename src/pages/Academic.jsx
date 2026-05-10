@@ -83,10 +83,10 @@ function playReelClick() {
 // ── Meta chip ────────────────────────────────────────────────────────────────
 const MetaItem = ({ label, value }) => (
   <div className="flex flex-col min-w-0">
-    <p className="text-[#A855F7] text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold mb-1">
+    <p className="text-[var(--color-accent)] text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold mb-1">
       {label}
     </p>
-    <p className="text-[#22D3EE] text-xs sm:text-sm font-bold break-words">
+    <p className="text-(--color-primary) text-xs sm:text-sm font-bold break-words">
       {value}
     </p>
   </div>
@@ -225,7 +225,7 @@ const ProjectorModel = () => {
       </mesh>
       <mesh position={[-1.36, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.28, 0.28, 0.05, 32]} />
-        <meshBasicMaterial color="#A855F7" />
+        <meshBasicMaterial color="var(--color-accent)" />
       </mesh>
       <primitive object={targetObj} />
       <SpotLight
@@ -239,7 +239,7 @@ const ProjectorModel = () => {
         attenuation={4}
         anglePower={2}
         intensity={25}
-        color="#A855F7"
+        color="var(--color-accent)"
         opacity={1}
       />
       <group position={[-0.3, 1.3, 0.25]} ref={reel1Ref}>
@@ -385,10 +385,10 @@ const Academic = () => {
           Portfolio
         </p>
         <h2
-          className="font-black text-[#22D3EE] leading-tight"
+          className="font-black text-[var(--color-primary)] leading-tight"
           style={{ fontSize: "clamp(32px, 7vw, 72px)" }}
         >
-          Academic <span className="text-[#A855F7]">Journey</span>
+          Academic <span className="text-[var(--color-accent)]">Journey</span>
         </h2>
         <p className="mt-5 text-[10px] tracking-[0.3em] text-[#94A3B8] uppercase font-bold">
           Cinematic Slideshow
@@ -413,7 +413,7 @@ const Academic = () => {
             style={{ opacity: 0, pointerEvents: index === activeIndex ? "auto" : "none" }}
           >
             <div className="w-full will-change-transform" style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
-              <div className="card-shell overflow-hidden rounded-[2rem] border border-[#A855F7]/30 bg-white shadow-[0_0_80px_rgba(168,85,247,0.15)] relative">
+              <div className="card-shell overflow-hidden rounded-[2rem] border border-[var(--color-accent)]/30 bg-white shadow-[0_0_80px_rgba(168,85,247,0.15)] relative">
 
                 {/* IMAGE */}
                 <div className="relative overflow-hidden" style={{ height: "clamp(200px, 28vw, 300px)" }}>
@@ -429,19 +429,19 @@ const Academic = () => {
                 </div>
 
                 {/* BODY */}
-                <div className="card-content bg-white p-6 sm:p-8">
+                <div className="card-content bg-transparent p-6 sm:p-8">
                   <div className="flex flex-col gap-6">
                     <div>
-                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[#A855F7] mb-3 font-bold">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[var(--color-accent)] mb-3 font-bold">
                         {item.level}
                       </p>
                       <h2
-                        className="font-black text-[#22D3EE] leading-tight mb-4"
+                        className="font-black text-[var(--color-primary)] leading-tight mb-4"
                         style={{ fontSize: "clamp(24px, 3vw, 42px)" }}
                       >
                         {item.title}
                       </h2>
-                      <div className="w-12 h-[2px] bg-[#A855F7] mb-4" />
+                      <div className="w-12 h-[2px] bg-[var(--color-accent)] mb-4" />
                       <p className="text-[#94A3B8] text-sm leading-relaxed max-w-xl">
                         {item.description}
                       </p>
@@ -465,7 +465,7 @@ const Academic = () => {
           {/* Prev button */}
           <button
             onClick={goPrev}
-            className="w-10 h-10 rounded-full border-2 border-[#A855F7]/50 flex items-center justify-center text-[#A855F7] hover:bg-[#A855F7]/10 transition-all"
+            className="w-10 h-10 rounded-full border-2 border-[var(--color-accent)]/50 flex items-center justify-center text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all"
             aria-label="Previous"
           >
             ←
@@ -482,7 +482,7 @@ const Academic = () => {
                   width: i === activeIndex ? 26 : 8,
                   height: 8,
                   borderRadius: 4,
-                  background: i === activeIndex ? "#A855F7" : "#22D3EE22",
+                  background: i === activeIndex ? "var(--color-accent)" : "#22D3EE22",
                   border: "none",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
@@ -494,7 +494,7 @@ const Academic = () => {
           {/* Next button */}
           <button
             onClick={goNext}
-            className="w-10 h-10 rounded-full border-2 border-[#A855F7]/50 flex items-center justify-center text-[#A855F7] hover:bg-[#A855F7]/10 transition-all"
+            className="w-10 h-10 rounded-full border-2 border-[var(--color-accent)]/50 flex items-center justify-center text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all"
             aria-label="Next"
           >
             →
@@ -509,7 +509,7 @@ const Academic = () => {
               style={{
                 height: "100%",
                 borderRadius: 9999,
-                background: "linear-gradient(90deg, #22D3EE, #A855F7)",
+                background: "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
                 animation: "pbFill 4s linear forwards",
               }}
             />

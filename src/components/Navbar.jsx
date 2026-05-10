@@ -39,7 +39,7 @@ const Navbar = () => {
     <>
       {/* HEADER */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 bg-white transition-all duration-500 ${
+        className={`fixed top-0 left-0 w-full z-50 bg-transparent transition-all duration-500 ${
           scrolled
             ? "shadow-[0_2px_20px_rgba(27,42,74,0.09)] py-5"
             : "shadow-none py-7"

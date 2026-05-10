@@ -70,7 +70,7 @@ const Contact = () => {
             className="lg:col-span-2 p-8 sm:p-10"
             style={{ backgroundColor: "var(--color-primary)" }}
           >
-            <h3 className="text-2xl font-bold text-white mb-8">
+            <h3 className="text-2xl font-bold text-(--color-heading) mb-8">
               Contact Info
             </h3>
 
@@ -86,7 +86,7 @@ const Contact = () => {
 
                 <a
                   href="mailto:aman@example.com"
-                  className="text-white text-sm sm:text-base hover:underline break-all"
+                  className="text-[var(--color-heading)] text-sm sm:text-base hover:underline break-all"
                 >
                   aman@example.com
                 </a>
@@ -102,7 +102,7 @@ const Contact = () => {
 
                 <a
                   href="tel:+9779800000000"
-                  className="text-white text-sm sm:text-base hover:underline"
+                  className="text-[var(--color-heading)] text-sm sm:text-base hover:underline"
                 >
                   +977 9800000000
                 </a>
@@ -116,7 +116,7 @@ const Contact = () => {
                   Location
                 </p>
 
-                <p className="text-white text-sm sm:text-base">
+                <p className="text-[var(--color-heading)] text-sm sm:text-base">
                   Kathmandu, Nepal
                 </p>
               </div>

@@ -134,8 +134,8 @@ const News = () => {
                   <span
                     className="text-xs md:text-sm font-semibold px-4 py-1 rounded-full"
                     style={{
-                      backgroundColor: "var(--color-accent-light)",
-                      color: "var(--color-primary)",
+                      backgroundColor: "var(--color-primary)",
+                      color: "var(--color-accent-light)",
                     }}
                   >
                     {news.category}

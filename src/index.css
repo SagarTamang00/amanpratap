@@ -2,43 +2,51 @@
 
 :root {
   /* Background */
-  --color-bg:          transparent;
-  --color-bg-section:  transparent; /* Let global body gradient show through */
+  --color-bg: transparent;
+  --color-bg-section: transparent;
 
   /* Text */
-  --color-text:        #22D3EE; /* Cyan */
-  --color-heading:     #22D3EE; /* Cyan */
-  --color-body:        #94A3B8; /* Slate 400 */
+  --color-text: #f5f0e8;
+  --color-heading: #ffffff;
+  --color-body: rgba(245, 240, 232, 0.75);
 
-  /* Accents */
-  --color-primary:     #22D3EE; 
-  --color-accent:      #A855F7; /* Purple */
-  --color-accent-light:#C084FC; /* Light Purple */
-  --color-navy:        #06B6D4; /* Deep Cyan */
+  /* Gold accents */
+  --color-primary: #c9a84c;
+  --color-accent: #e6d38e;
+  --color-accent-light: #f4e2a3;
+  --color-navy: #c9a84c;
 
-  /* Legacy variables (keep for other components) */
-  --text:              #6b6375;
-  --text-h:            #08060d;
-  --bg:                #fff;
-  --border:            #e5e4e7;
-  --code-bg:           #f4f3ec;
-  --accent:            #aa3bff;
-  --accent-bg:         rgba(170, 59, 255, 0.1);
-  --accent-border:     rgba(170, 59, 255, 0.5);
-  --social-bg:         rgba(244, 243, 236, 0.5);
-  --shadow:            rgba(0, 0, 0, 0.1) 0 10px 15px -3px, 
-                       rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Legacy variables */
+  --text: #f5f0e8;
+  --text-h: #ffffff;
+  --bg: #fff;
+  --border: rgba(230, 211, 142, 0.18);
+  --code-bg: rgba(255,255,255,0.05);
 
-  --sans:    system-ui, 'Segoe UI', Roboto, sans-serif;
+  --accent: #c9a84c;
+  --accent-bg: rgba(201,168,76,0.12);
+  --accent-border: rgba(201,168,76,0.35);
+
+  --social-bg: rgba(255,255,255,0.05);
+
+  --shadow:
+    rgba(201,168,76,0.08) 0 10px 15px -3px,
+    rgba(201,168,76,0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono:    ui-monospace, Consolas, monospace;
+  --mono: ui-monospace, Consolas, monospace;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  /* Deep Space Cosmic Gradient */
-  background: linear-gradient(135deg, #040814 0%, #082f49 50%, #2e1065 100%);
+  background: linear-gradient(
+    135deg,
+    #040814 0%,
+    #082f49 50%,
+    #2e1065 100%
+  );
   background-attachment: fixed;
   color: var(--color-body);
 }

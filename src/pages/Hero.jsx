@@ -76,14 +76,14 @@ style={{
       <div className="flex flex-wrap md:flex-nowrap gap-x-[0.2em] gap-y-[0.1em] drop-shadow-xl mb-2 md:mb-4">
         <span
           className={`animate__animated ${isLoaded ? 'animate__bounceInLeft' : 'opacity-0'} block`}
-          style={{ color: 'var(--color-text,#22D3EE)', animationDelay: '0.3s' }}
+          style={{ color: 'var(--color-text,var(--color-primary))', animationDelay: '0.3s' }}
           data-cursor="large"
         >
           Aman
         </span>
         <span
           className={`animate__animated ${isLoaded ? 'animate__bounceInRight' : 'opacity-0'} block`}
-          style={{ color: 'var(--color-text,#22D3EE)', animationDelay: '0.5s' }}
+          style={{ color: 'var(--color-text,var(--color-primary))', animationDelay: '0.5s' }}
           data-cursor="large"
         >
           Pratap
@@ -97,7 +97,7 @@ style={{
     } block`}
     style={{
       color: 'transparent',
-      WebkitTextStroke: '2px var(--color-text,#22D3EE)',
+      WebkitTextStroke: '2px var(--color-primary)',
       letterSpacing: '0.04em',
       animationDelay: '0.7s',
     }}
@@ -116,12 +116,12 @@ style={{
       <svg width="24" height="8" viewBox="0 0 40 12" fill="none" xmlns="http://www.w3.org/2000/svg"
         className="animate-pulse shrink-0 md:w-9 md:h-3">
         <path d="M0 6H38M38 6L33 1M38 6L33 11"
-          stroke="var(--color-accent,#A855F7)" strokeWidth="2"
+          stroke="var(--color-accent,var(--color-accent))" strokeWidth="2"
           strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <h2
         className="text-[0.65rem] sm:text-xs md:text-base uppercase font-semibold tracking-[0.15em] sm:tracking-[0.25em] md:tracking-[0.35em]"
-        style={{ color: 'var(--color-accent,#A855F7)', fontFamily: '"League Spartan", sans-serif' }}
+        style={{ color: 'var(--color-accent,var(--color-accent))', fontFamily: '"League Spartan", sans-serif' }}
       >
         Nepali Film Director
       </h2>
@@ -130,7 +130,7 @@ style={{
     {/* Gold rule */}
     <div
       className={`h-px mt-4 md:mt-6 mb-6 transition-all duration-1000 ease-out delay-700 ${isLoaded ? 'opacity-100 w-24 md:w-40' : 'opacity-0 w-0'}`}
-      style={{ background: 'linear-gradient(to right, var(--color-accent,#A855F7), transparent)' }}
+      style={{ background: 'linear-gradient(to right, var(--color-accent,), transparent)' }}
     />
 
   </div>
