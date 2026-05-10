@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { SpotLight, Float, Environment } from "@react-three/drei";
+import * as THREE from "three";
 
 const educationData = [
   {
@@ -37,203 +37,420 @@ const educationData = [
   },
 ];
 
+// ── Web Audio projector click — no MP3 needed ─────────────────────────────────
+function playReelClick() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+
+    const click = (t, freq, dur) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.3, t + dur);
+      g.gain.setValueAtTime(0.15, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + dur);
+    };
+
+    click(now, 800, 0.04); // First click  — 800 Hz
+    click(now + 0.07, 600, 0.04); // Second click — 600 Hz
+    click(now + 0.12, 900, 0.03); // Third click  — 900 Hz
+
+    // White noise burst for mechanical texture
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.05;
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.1, now);
+    ng.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    noise.connect(ng);
+    ng.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + 0.12);
+
+    setTimeout(() => ctx.close(), 600);
+  } catch (_) { }
+}
+
+// ── Meta chip ────────────────────────────────────────────────────────────────
 const MetaItem = ({ label, value }) => (
   <div className="flex flex-col min-w-0">
-    <p className="text-[#b89d64] text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold mb-1">
+    <p className="text-[#E8A020] text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold mb-1">
       {label}
     </p>
-    <p className="text-white text-xs sm:text-sm font-medium break-words">
+    <p className="text-[#1B2A4A] text-xs sm:text-sm font-bold break-words">
       {value}
     </p>
   </div>
 );
 
-const Academic = () => {
-  const containerRef = useRef(null);
-  const headerRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => setVisible(e.isIntersecting),
-      { threshold: 0.2 }
-    );
-    if (headerRef.current) obs.observe(headerRef.current);
-    return () => obs.disconnect();
+// ── 3D Film Reel ─────────────────────────────────────────────────────────────
+const FilmReel = ({ color = "#A1A1AA" }) => {
+  const shape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.absarc(0, 0, 0.7, 0, Math.PI * 2, false);
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const hole = new THREE.Path();
+      hole.absarc(Math.cos(angle) * 0.45, Math.sin(angle) * 0.45, 0.16, 0, Math.PI * 2, true);
+      s.holes.push(hole);
+    }
+    const centerHole = new THREE.Path();
+    centerHole.absarc(0, 0, 0.1, 0, Math.PI * 2, true);
+    s.holes.push(centerHole);
+    return s;
   }, []);
 
-  useEffect(() => {
+  const extrudeSettings = useMemo(() => ({
+    depth: 0.02, bevelEnabled: true, bevelSegments: 2,
+    steps: 1, bevelSize: 0.01, bevelThickness: 0.01,
+  }), []);
+
+  return (
+    <group>
+      <mesh position={[0, 0, 0.04]}>
+        <extrudeGeometry args={[shape, extrudeSettings]} />
+        <meshStandardMaterial color={color} metalness={0.4} roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0, -0.06]}>
+        <extrudeGeometry args={[shape, extrudeSettings]} />
+        <meshStandardMaterial color={color} metalness={0.4} roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0, -0.01]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.35, 0.35, 0.08, 32]} />
+        <meshStandardMaterial color="#78350f" roughness={0.8} metalness={0.2} />
+      </mesh>
+      <mesh position={[0, 0, -0.01]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.12, 0.12, 0.12, 32]} />
+        <meshStandardMaterial color={color} metalness={0.4} roughness={0.5} />
+      </mesh>
+    </group>
+  );
+};
+
+// Shared ref — set to true from outside the Canvas to trigger a spin burst
+const reelSpinSignal = { active: false };
+
+// ── 3D Projector ─────────────────────────────────────────────────────────────
+const ProjectorModel = () => {
+  const reel1Ref = useRef(null);
+  const reel2Ref = useRef(null);
+  const burstSpeed = useRef(0); // extra speed added on slide change
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 5;
+  const projScale = isMobile ? 0.35 : 0.6;
+  const projX = isMobile ? 0 : 3.5;
+  const projY = isMobile ? 3.5 : 0.5;
+
+  const targetObj = useMemo(() => {
+    const obj = new THREE.Object3D();
+    obj.position.set(isMobile ? 0 : -15, isMobile ? -5 : 0, 0);
+    return obj;
+  }, [isMobile]);
+
+  useFrame((_, delta) => {
+    // When signal fires, inject a burst of speed that decays back to baseline
+    if (reelSpinSignal.active) {
+      burstSpeed.current = 18;
+      reelSpinSignal.active = false;
+    }
+    // Decay burst speed toward 0 over ~0.6s
+    burstSpeed.current = Math.max(0, burstSpeed.current - delta * 28);
+    const speed = 1.5 + burstSpeed.current;
+    if (reel1Ref.current) reel1Ref.current.rotation.z -= delta * speed;
+    if (reel2Ref.current) reel2Ref.current.rotation.z -= delta * speed;
+  });
+
+  return (
+    <group position={[projX, projY, 0]} rotation={[0, -Math.PI / 3, 0]} scale={projScale}>
+      <mesh position={[0, -1.0, 0]}>
+        <boxGeometry args={[1.3, 0.2, 1.1]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.7} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, -1.5, 0]}>
+        <cylinderGeometry args={[0.15, 0.15, 0.8, 16]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.4} />
+      </mesh>
+      <mesh position={[0, -1.95, 0]}>
+        <cylinderGeometry args={[0.25, 0.25, 0.15, 16]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.8} />
+      </mesh>
+      <group rotation={[0, Math.PI / 4, 0]}>
+        {[0, Math.PI * 2 / 3, -Math.PI * 2 / 3].map((ry, i) => (
+          <group key={i} position={[0, -2.0, 0]} rotation={[0, ry, 0]}>
+            <group rotation={[0.4, 0, 0]}>
+              <mesh position={[0, -1.5, 0]}>
+                <cylinderGeometry args={[0.06, 0.03, 3.0, 16]} />
+                <meshStandardMaterial color="#0f172a" roughness={0.8} />
+              </mesh>
+            </group>
+          </group>
+        ))}
+      </group>
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1.5, 1.8, 1.0]} />
+        <meshStandardMaterial color="#64748b" roughness={0.6} metalness={0.4} />
+      </mesh>
+      <mesh position={[0, 0, 0.52]}>
+        <boxGeometry args={[1.2, 1.0, 0.1]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.5} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, 0, -0.52]}>
+        <boxGeometry args={[1.2, 1.0, 0.1]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.5} metalness={0.5} />
+      </mesh>
+      {[-0.3, 0.3].map((x, i) =>
+        [-0.2, 0.2].map((y, j) => (
+          <mesh key={`k-${i}-${j}`} position={[x, y, 0.58]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.1, 0.1, 0.1, 16]} />
+            <meshStandardMaterial color="#f59e0b" roughness={0.3} metalness={0.8} />
+          </mesh>
+        ))
+      )}
+      <mesh position={[-0.8, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.25, 0.35, 0.8, 32]} />
+        <meshStandardMaterial color="#64748b" roughness={0.4} metalness={0.6} />
+      </mesh>
+      <mesh position={[-1.25, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.3, 0.25, 0.2, 32]} />
+        <meshStandardMaterial color="#d97706" roughness={0.3} metalness={0.8} />
+      </mesh>
+      <mesh position={[-1.36, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.28, 0.28, 0.05, 32]} />
+        <meshBasicMaterial color="#E8A020" />
+      </mesh>
+      <primitive object={targetObj} />
+      <SpotLight
+        position={[-1.36, 0.2, 0]}
+        target={targetObj}
+        penumbra={0.2}
+        radiusTop={0.2}
+        radiusBottom={isMobile ? 20 : 40}
+        distance={50}
+        angle={1.1}
+        attenuation={4}
+        anglePower={2}
+        intensity={25}
+        color="#E8A020"
+        opacity={1}
+      />
+      <group position={[-0.3, 1.3, 0.25]} ref={reel1Ref}>
+        <FilmReel color="#64748b" />
+      </group>
+      <group position={[0.6, 0.9, 0.25]} ref={reel2Ref}>
+        <FilmReel color="#64748b" />
+      </group>
+    </group>
+  );
+};
+
+const ProjectorScene = () => (
+  <>
+    <ambientLight intensity={0.7} />
+    <directionalLight position={[5, 5, 5]} intensity={1.2} />
+    <directionalLight position={[0, 0, 10]} intensity={1.0} color="#ffffff" />
+    <Environment preset="city" />
+    <Float speed={1.5} rotationIntensity={0.03} floatIntensity={0.05}>
+      <ProjectorModel />
+    </Float>
+  </>
+);
+
+// ── Main Component ───────────────────────────────────────────────────────────
+const Academic = () => {
+  const containerRef = useRef(null);
+  const timerRef = useRef(null);
+  const touchStartX = useRef(null);
+  const isAnimating = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const total = educationData.length;
+
+  // ── GSAP card transition ──
+  const animateToIndex = useCallback((nextIndex) => {
+    if (isAnimating.current) return;
+    isAnimating.current = true;
+    playReelClick();
+    reelSpinSignal.active = true;
+
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray(".edu-card");
+      const direction = nextIndex > activeIndex ? 1 : -1;
 
-      // ✅ INITIAL STATE: Use autoAlpha (opacity + visibility) and pointerEvents to kill "black bleed"
-      gsap.set(cards, {
-        yPercent: 35,
-        autoAlpha: 0,
-        scale: 0.92,
-        pointerEvents: "none",
-      });
-
-      // ✅ First card must be visible immediately
-      gsap.set(cards[0], {
-        yPercent: 0,
-        autoAlpha: 1,
-        scale: 1,
-        pointerEvents: "auto",
-      });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".stack-wrapper",
-          start: "top top",
-          end: `+=${cards.length * 120}%`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-        },
-      });
-
-      cards.forEach((card, index) => {
-        if (index === 0) return;
-
-        const prevCard = cards[index - 1];
-
-        // Current card enters: Fade in and enable interactions
-        tl.to(
-          card,
-          {
-            yPercent: 0,
-            autoAlpha: 1,
-            scale: 1,
-            pointerEvents: "auto",
-            duration: 1,
-            ease: "power2.out",
-          },
-          index
-        );
-
-        // Previous card shrinks underneath and becomes non-interactive
-        tl.to(
-          prevCard,
-          {
-            scale: 0.94,
-            filter: "brightness(0.55)",
-            pointerEvents: "none",
-            duration: 1,
-            ease: "power2.out",
-          },
-          index
-        );
+      cards.forEach((card, idx) => {
+        if (idx === nextIndex) {
+          gsap.fromTo(
+            card,
+            { autoAlpha: 0, x: 100 * direction, scale: 0.95 },
+            {
+              autoAlpha: 1, x: 0, scale: 1,
+              duration: 0.8, ease: "power3.out", zIndex: 10,
+              onComplete: () => { isAnimating.current = false; },
+            }
+          );
+        } else {
+          gsap.to(card, {
+            autoAlpha: 0, x: -100 * direction, scale: 0.95,
+            duration: 0.6, ease: "power2.in", zIndex: 0,
+          });
+        }
       });
     }, containerRef);
 
+    setActiveIndex(nextIndex);
     return () => ctx.revert();
-  }, []);
+  }, [activeIndex]);
+
+  // ── Reset and start auto-advance timer ──
+  const resetTimer = useCallback(() => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % total;
+        playReelClick();
+        reelSpinSignal.active = true;
+        return next;
+      });
+    }, 4000);
+  }, [total]);
+
+  // ── Initial GSAP transition on activeIndex change ──
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray(".edu-card");
+      cards.forEach((card, idx) => {
+        if (idx === activeIndex) {
+          gsap.fromTo(
+            card,
+            { autoAlpha: 0, x: 100, scale: 0.95 },
+            { autoAlpha: 1, x: 0, scale: 1, duration: 0.8, ease: "power3.out", zIndex: 10 }
+          );
+        } else {
+          gsap.to(card, { autoAlpha: 0, x: -100, scale: 0.95, duration: 0.6, ease: "power2.in", zIndex: 0 });
+        }
+      });
+    }, containerRef);
+    return () => ctx.revert();
+  }, [activeIndex]);
+
+  // ── Start auto-advance on mount ──
+  useEffect(() => {
+    resetTimer();
+    return () => clearInterval(timerRef.current);
+  }, [resetTimer]);
+
+  // ── Manual navigation ──
+  const goTo = useCallback((idx) => {
+    if (idx === activeIndex || isAnimating.current) return;
+    animateToIndex(idx);
+    resetTimer();
+  }, [activeIndex, animateToIndex, resetTimer]);
+
+  const goPrev = useCallback(() => {
+    goTo((activeIndex - 1 + total) % total);
+  }, [activeIndex, total, goTo]);
+
+  const goNext = useCallback(() => {
+    goTo((activeIndex + 1) % total);
+  }, [activeIndex, total, goTo]);
+
+  // ── Touch / swipe handlers ──
+  const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 40) return;
+    dx < 0 ? goNext() : goPrev();
+  };
 
   return (
     <section
       ref={containerRef}
-      className="w-full bg-[#f5f1ea]"
+      className="w-full bg-[#F5EFE0] overflow-hidden"
       style={{ isolation: "isolate" }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       {/* HEADER */}
-      <div
-        ref={headerRef}
-        className="flex flex-col items-center justify-center text-center px-4 pt-24 pb-20"
-      >
-        <div
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(30px)",
-            transition: "all 0.8s ease",
-          }}
+      <div className="flex flex-col items-center justify-center text-center px-4 pt-24 pb-12 relative z-20">
+        <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-[#374151] mb-4 font-bold">
+          Portfolio
+        </p>
+        <h2
+          className="font-black text-[#1B2A4A] leading-tight"
+          style={{ fontSize: "clamp(32px, 7vw, 72px)" }}
         >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-neutral-500 mb-4 font-medium">
-            Portfolio
-          </p>
-          <h2
-            className="font-black text-[#1F4891] leading-tight"
-            style={{ fontSize: "clamp(32px, 7vw, 72px)" }}
-          >
-            Academic <span className="text-[#b89d64]">Journey</span>
-          </h2>
-          <p className="mt-5 text-[10px] tracking-[0.3em] text-neutral-500 uppercase">
-            Scroll ↓
-          </p>
-        </div>
+          Academic <span className="text-[#E8A020]">Journey</span>
+        </h2>
+        <p className="mt-5 text-[10px] tracking-[0.3em] text-[#374151] uppercase font-bold">
+          Cinematic Slideshow
+        </p>
       </div>
 
       {/* STACK WRAPPER */}
-      <div className="stack-wrapper relative h-screen overflow-hidden">
+      <div className="stack-wrapper relative h-screen w-full bg-[#F5EFE0]">
+
+        {/* 3D Canvas */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
+            <ProjectorScene />
+          </Canvas>
+        </div>
+
+        {/* Cards */}
         {educationData.map((item, index) => (
           <div
             key={index}
-            className="edu-card absolute inset-0 flex items-center justify-center px-4 sm:px-6"
-            style={{ zIndex: educationData.length - index }}
+            className="edu-card absolute inset-y-0 left-0 flex items-center justify-start pl-4 pr-4 sm:pl-12 md:pl-24 lg:pl-32 w-full md:w-[60%] lg:w-[50%]"
+            style={{ opacity: 0, pointerEvents: index === activeIndex ? "auto" : "none" }}
           >
-            <div
-              className="w-full max-w-5xl will-change-transform"
-              style={{
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden",
-              }}
-            >
-              {/* CARD */}
-              <div className="card-shell overflow-hidden rounded-[2rem] border border-[#b89d64]/20 bg-[#111111] shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+            <div className="w-full will-change-transform" style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
+              <div className="card-shell overflow-hidden rounded-[2rem] border border-[#E8A020]/30 bg-white shadow-[0_0_80px_rgba(232,160,32,0.15)] relative">
 
                 {/* IMAGE */}
-                <div
-                  className="relative overflow-hidden"
-                  style={{ height: "clamp(220px, 34vw, 360px)" }}
-                >
+                <div className="relative overflow-hidden" style={{ height: "clamp(200px, 28vw, 300px)" }}>
                   <div
                     className="absolute inset-0 scale-105"
                     style={{
-                      backgroundImage: `
-                        linear-gradient(
-                          to bottom,
-                          transparent 50%,
-                          rgba(0,0,0,0.6) 100%
-                        ),
-                        url(${item.bg})
-                      `,
+                      backgroundImage: `linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.8) 100%), url(${item.bg})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
                   />
-                  {/* cinematic vignette */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.35)_100%)]" />
-                  {/* ✅ Removed the h-32 solid black bleed div */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,160,32,0.15)_0%,rgba(255,255,255,0.4)_100%)]" />
                 </div>
 
                 {/* BODY */}
-                <div className="card-content bg-[#111111] p-6 sm:p-8 md:p-12">
-                  <div className="flex flex-col md:flex-row md:justify-between gap-8">
-
-                    {/* LEFT */}
-                    <div className="flex-1">
-                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[#b89d64] mb-3 font-semibold">
+                <div className="card-content bg-white p-6 sm:p-8">
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[#E8A020] mb-3 font-bold">
                         {item.level}
                       </p>
                       <h2
-                        className="font-black text-white leading-tight mb-5"
-                        style={{ fontSize: "clamp(28px, 4vw, 52px)" }}
+                        className="font-black text-[#1B2A4A] leading-tight mb-4"
+                        style={{ fontSize: "clamp(24px, 3vw, 42px)" }}
                       >
                         {item.title}
                       </h2>
-                      <div className="w-16 h-[2px] bg-[#b89d64] mb-5" />
-                      <p className="text-neutral-400 text-sm sm:text-base leading-relaxed max-w-2xl">
+                      <div className="w-12 h-[2px] bg-[#E8A020] mb-4" />
+                      <p className="text-[#374151] text-sm leading-relaxed max-w-xl">
                         {item.description}
                       </p>
                     </div>
-
-                    {/* RIGHT */}
-                    <div className="flex flex-row md:flex-col gap-6 md:min-w-[180px]">
+                    <div className="flex flex-wrap gap-x-8 gap-y-4 pt-4 border-t border-gray-200">
                       <MetaItem label="Institution" value={item.school} />
                       <MetaItem label="Year" value={item.year} />
                       <MetaItem label={item.meta.label} value={item.meta.value} />
                     </div>
-
                   </div>
                 </div>
 
@@ -241,7 +458,68 @@ const Academic = () => {
             </div>
           </div>
         ))}
+
+        {/* ── CONTROLS ── */}
+        <div className="absolute bottom-8 left-0 w-full md:w-[60%] lg:w-[50%] flex items-center justify-center gap-6 z-30 px-4">
+
+          {/* Prev button */}
+          <button
+            onClick={goPrev}
+            className="w-10 h-10 rounded-full border-2 border-[#E8A020]/50 flex items-center justify-center text-[#E8A020] hover:bg-[#E8A020]/10 transition-all"
+            aria-label="Previous"
+          >
+            ←
+          </button>
+
+          {/* Dot indicators */}
+          <div className="flex gap-2 items-center">
+            {educationData.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Slide ${i + 1}`}
+                style={{
+                  width: i === activeIndex ? 26 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: i === activeIndex ? "#E8A020" : "#1B2A4A22",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={goNext}
+            className="w-10 h-10 rounded-full border-2 border-[#E8A020]/50 flex items-center justify-center text-[#E8A020] hover:bg-[#E8A020]/10 transition-all"
+            aria-label="Next"
+          >
+            →
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        <div className="absolute bottom-4 left-0 w-full md:w-[60%] lg:w-[50%] px-4 z-30">
+          <div className="w-full h-[2px] rounded-full overflow-hidden" style={{ background: "#1B2A4A11" }}>
+            <div
+              key={`pb-${activeIndex}`}
+              style={{
+                height: "100%",
+                borderRadius: 9999,
+                background: "linear-gradient(90deg, #1B2A4A, #E8A020)",
+                animation: "pbFill 4s linear forwards",
+              }}
+            />
+          </div>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes pbFill { from { width: 0% } to { width: 100% } }
+      `}</style>
     </section>
   );
 };

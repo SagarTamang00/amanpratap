@@ -3,18 +3,18 @@
 :root {
   /* Background */
   --color-bg:          #FFFFFF;
-  --color-bg-section:  #F5EFE0;
+  --color-bg-section:  #E0F2FE; /* Sky 100 */
 
   /* Text */
-  --color-text:        #1F4891;
-  --color-heading:     #1B2A4A;
-  --color-body:        #374151;
+  --color-text:        #0284C7; /* Sky 600 */
+  --color-heading:     #0C4A6E; /* Sky 900 */
+  --color-body:        #334155; /* Slate 700 */
 
   /* Accents */
-  --color-primary:     #1B2A4A;
-  --color-accent:      #E8A020;
-  --color-accent-light:#5BC4D8;
-  --color-navy:        #243B6E;
+  --color-primary:     #0C4A6E; 
+  --color-accent:      #EAB308; /* Yellow 500 */
+  --color-accent-light:#38BDF8; /* Sky 400 */
+  --color-navy:        #075985; /* Sky 800 */
 
   /* Legacy variables (keep for other components) */
   --text:              #6b6375;
