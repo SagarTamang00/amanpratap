@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import ScrollToTop from './components/ScrollToTop'
 
 import Hero from './pages/Hero'
 import Awards from './pages/Award'
@@ -33,6 +34,7 @@ const AboutPage = () => {
 const App = () => {
   return (
     <>
+      <ScrollToTop />
       <Navbar />
 
       <main>

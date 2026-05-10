@@ -254,10 +254,10 @@ const ProjectorModel = () => {
 
 const ProjectorScene = () => (
   <>
-    <ambientLight intensity={0.7} />
-    <directionalLight position={[5, 5, 5]} intensity={1.2} />
-    <directionalLight position={[0, 0, 10]} intensity={1.0} color="#ffffff" />
-    <Environment preset="city" />
+    <ambientLight intensity={1.5} />
+    <directionalLight position={[5, 5, 5]} intensity={2.0} />
+    <directionalLight position={[-5, 5, -5]} intensity={1.0} color="#ffffff" />
+    <directionalLight position={[0, 0, 10]} intensity={1.5} color="#ffffff" />
     <Float speed={1.5} rotationIntensity={0.03} floatIntensity={0.05}>
       <ProjectorModel />
     </Float>

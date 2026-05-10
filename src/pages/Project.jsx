@@ -7,8 +7,11 @@ const projects = [
         category: 'Feature Film',
         year: '2024',
         duration: '1h 42min',
-        preview: 'https://www.w3schools.com/html/mov_bbb.mp4', // replace with your video
-        youtube: 'dQw4w9WgXcQ', // replace with your YouTube ID
+        director: 'Aarav Shrestha',
+        genre: 'Drama · Adventure',
+        synopsis: 'A lone mountaineer discovers an ancient monastery hidden above the clouds, unraveling a mystery that has kept a valley frozen in time for centuries.',
+        preview: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        youtube: 'IMWyrrrT39w',
     },
     {
         id: 2,
@@ -16,7 +19,10 @@ const projects = [
         category: 'Short Film',
         year: '2023',
         duration: '24min',
-        preview: 'https://www.w3schools.com/html/movie.mp4', // replace with your video
+        director: 'Priya Tamang',
+        genre: 'Drama · Mystery',
+        synopsis: 'Two estranged siblings return to their childhood home in a remote valley to find that some silences speak louder than words ever could.',
+        preview: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
         youtube: 'dQw4w9WgXcQ',
     },
     {
@@ -25,7 +31,10 @@ const projects = [
         category: 'Documentary',
         year: '2023',
         duration: '58min',
-        preview: 'https://www.w3schools.com/html/mov_bbb.mp4',
+        director: 'Bikash Gurung',
+        genre: 'Documentary · Nature',
+        synopsis: 'Following three farming families through the desperate weeks before the monsoon arrives — a portrait of hope, patience, and the rhythm of the earth.',
+        preview: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         youtube: 'dQw4w9WgXcQ',
     },
     {
@@ -34,7 +43,10 @@ const projects = [
         category: 'Short Film',
         year: '2022',
         duration: '18min',
-        preview: 'https://www.w3schools.com/html/movie.mp4',
+        director: 'Sita Rai',
+        genre: 'Drama · Coming-of-age',
+        synopsis: 'A young potter inherits her grandmother\'s wheel and discovers that every crack in the clay holds a story she was never meant to forget.',
+        preview: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
         youtube: 'dQw4w9WgXcQ',
     },
     {
@@ -43,12 +55,14 @@ const projects = [
         category: 'Commercial',
         year: '2022',
         duration: '3min',
-        preview: 'https://www.w3schools.com/html/mov_bbb.mp4',
+        director: 'Aarav Shrestha',
+        genre: 'Commercial · Lifestyle',
+        synopsis: 'A cinematic brand film tracing the journey of handwoven textiles from highland looms to the hands of people who carry stories in their clothing.',
+        preview: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         youtube: 'dQw4w9WgXcQ',
     },
 ];
 
-// Split into rows: alternating [2, 1, 2, 1...] or [1, 2, 1, 2...]
 const buildRows = (items) => {
     const rows = [];
     let i = 0;
@@ -69,33 +83,43 @@ const buildRows = (items) => {
 const VideoCard = ({ project, onOpen, isDouble }) => {
     const videoRef = useRef(null);
     const [hovered, setHovered] = useState(false);
+    const [videoLoaded, setVideoLoaded] = useState(false);
+    const [videoError, setVideoError] = useState(false);
 
     useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.play().catch(() => { });
+        const video = videoRef.current;
+        if (!video) return;
+        video.muted = true;
+        video.volume = 0;
+        const playVideo = () => {
+            video.play().catch(() => setVideoError(true));
+        };
+        if (video.readyState >= 3) {
+            playVideo();
+        } else {
+            video.addEventListener('canplay', playVideo, { once: true });
         }
+        return () => video.removeEventListener('canplay', playVideo);
     }, []);
 
     return (
         <div
-            className={`relative group cursor-pointer overflow-hidden w-full ${isDouble ? 'md:flex-1 aspect-video md:aspect-video' : 'md:w-full aspect-video md:aspect-21/9'
-                }`}
+            className={`relative cursor-pointer overflow-hidden w-full ${isDouble ? 'md:flex-1 aspect-video' : 'md:w-full aspect-video'}`}
             style={{
                 borderRadius: '16px',
                 background: '#0d0b09',
-                border: '1px solid rgba(201,168,76,0.12)',
+                border: `1px solid ${hovered ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}`,
                 boxShadow: hovered
-                    ? '0 24px 64px rgba(0,0,0,0.8), 0 0 40px rgba(201,168,76,0.08)'
+                    ? '0 24px 64px rgba(0,0,0,0.8), 0 0 40px rgba(201,168,76,0.1)'
                     : '0 8px 32px rgba(0,0,0,0.5)',
-                transition: 'box-shadow 0.5s ease, transform 0.5s ease',
+                transition: 'box-shadow 0.5s ease, transform 0.5s ease, border-color 0.5s ease',
                 transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
             }}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             onClick={() => onOpen(project)}
-            data-cursor="large"
         >
-            {/* Autoplay muted video */}
+            {/* Video */}
             <video
                 ref={videoRef}
                 src={project.preview}
@@ -103,96 +127,110 @@ const VideoCard = ({ project, onOpen, isDouble }) => {
                 muted
                 loop
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+                onCanPlay={() => setVideoLoaded(true)}
+                onError={() => setVideoError(true)}
+                className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                    transform: hovered ? 'scale(1.04)' : 'scale(1)',
-                    filter: hovered ? 'brightness(0.7) grayscale(10%)' : 'brightness(0.6) grayscale(10%)',
-                    transition: 'transform 0.7s ease, filter 0.5s ease',
+                    transform: hovered ? 'scale(1.06)' : 'scale(1)',
+                    filter: hovered ? 'brightness(0.3)' : 'brightness(0.85)',
+                    transition: 'transform 0.8s ease, filter 0.6s ease',
+                    opacity: videoLoaded ? 1 : 0,
                 }}
             />
 
-            {/* Gradient overlay */}
-            <div
-                className="absolute inset-0"
-                style={{
-                    background: 'linear-gradient(to top, rgba(9,8,6,0.7) 0%, rgba(9,8,6,0.2) 50%, transparent 100%)',
-                    borderRadius: '16px',
-                }}
-            />
-
-            {/* Corner accents */}
-            <div
-                className="absolute top-4 left-4 w-5 h-5 pointer-events-none transition-opacity duration-300 hidden sm:block"
-                style={{
-                    borderTop: '1px solid rgba(201,168,76,0.6)',
-                    borderLeft: '1px solid rgba(201,168,76,0.6)',
-                    opacity: hovered ? 1 : 0.3,
-                }}
-            />
-            <div
-                className="absolute bottom-4 right-4 w-5 h-5 pointer-events-none transition-opacity duration-300 hidden sm:block"
-                style={{
-                    borderBottom: '1px solid rgba(201,168,76,0.6)',
-                    borderRight: '1px solid rgba(201,168,76,0.6)',
-                    opacity: hovered ? 1 : 0.3,
-                }}
-            />
-
-            {/* Category badge */}
-            <div className="absolute top-4 sm:top-5 right-4 sm:right-5">
-                <span
-                    className="text-[8px] sm:text-[9px] uppercase tracking-[0.35em] px-2 sm:px-3 py-1"
-                    style={{
-                        background: 'rgba(9,8,6,0.7)',
-                        border: '1px solid rgba(201,168,76,0.25)',
-                        color: '#c9a84c',
-                        fontFamily: 'var(--font-body, "EB Garamond", serif)',
-                        backdropFilter: 'blur(6px)',
-                        borderRadius: '2px',
-                    }}
-                >
-                    {project.category}
-                </span>
-            </div>
-
-            {/* Play button — appears on hover */}
-            <div
-                className="absolute inset-0 items-center justify-center pointer-events-none transition-all duration-400 hidden sm:flex"
-                style={{ opacity: hovered ? 1 : 0, transform: hovered ? 'scale(1)' : 'scale(0.85)' }}
-            >
+            {/* Fallback poster shown if video hasn't loaded yet */}
+            {!videoLoaded && (
                 <div
-                    className="flex items-center justify-center"
+                    className="absolute inset-0"
                     style={{
-                        width: '64px',
-                        height: '64px',
-                        border: '1px solid rgba(201,168,76,0.7)',
-                        borderRadius: '50%',
-                        background: 'rgba(9,8,6,0.5)',
-                        backdropFilter: 'blur(8px)',
+                        background: 'linear-gradient(135deg, #0d0b09 0%, #1a1710 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}
                 >
-                    <div
-                        style={{
-                            width: 0,
-                            height: 0,
-                            borderTop: '10px solid transparent',
-                            borderBottom: '10px solid transparent',
-                            borderLeft: '18px solid #c9a84c',
-                            marginLeft: '4px',
-                        }}
-                    />
+                    <div style={{
+                        width: '32px', height: '32px',
+                        border: '1px solid rgba(201,168,76,0.3)',
+                        borderTopColor: '#c9a84c',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                    }} />
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 </div>
-            </div>
+            )}
 
-            {/* Bottom content */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-10">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            {/* Hover overlay — only shown on hover */}
+            <div
+                className="absolute inset-0 flex flex-col justify-between p-5 sm:p-7"
+                style={{
+                    opacity: hovered ? 1 : 0,
+                    transition: 'opacity 0.35s ease',
+                    background: 'linear-gradient(to top, rgba(9,8,6,0.92) 0%, rgba(9,8,6,0.5) 50%, rgba(9,8,6,0.2) 100%)',
+                    pointerEvents: hovered ? 'auto' : 'none',
+                }}
+            >
+                {/* Top: category + year/duration */}
+                <div className="flex items-start justify-between">
+                    <span
+                        className="text-[8px] sm:text-[9px] uppercase tracking-[0.4em] px-2 sm:px-3 py-1"
+                        style={{
+                            background: 'rgba(9,8,6,0.6)',
+                            border: '1px solid rgba(201,168,76,0.35)',
+                            color: '#c9a84c',
+                            fontFamily: 'var(--font-body, "EB Garamond", serif)',
+                            borderRadius: '2px',
+                        }}
+                    >
+                        {project.category}
+                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                        <span
+                            className="text-[9px] uppercase tracking-[0.3em]"
+                            style={{ color: 'rgba(245,240,232,0.5)', fontFamily: 'var(--font-body, "EB Garamond", serif)' }}
+                        >
+                            {project.year}
+                        </span>
+                        <span
+                            className="text-[9px] uppercase tracking-[0.25em]"
+                            style={{ color: 'rgba(201,168,76,0.7)', fontFamily: 'var(--font-body, "EB Garamond", serif)' }}
+                        >
+                            {project.duration}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Middle: synopsis */}
+                <div className="flex flex-col gap-2 px-1">
+                    <div style={{
+                        height: '1px',
+                        background: 'linear-gradient(to right, rgba(201,168,76,0.6), transparent)',
+                        width: hovered ? '50px' : '0px',
+                        transition: 'width 0.5s ease 0.1s',
+                    }} />
+                    <p
+                        className="text-xs sm:text-sm leading-relaxed"
+                        style={{
+                            color: 'rgba(245,240,232,0.75)',
+                            fontFamily: 'var(--font-body, "EB Garamond", serif)',
+                            fontStyle: 'italic',
+                            maxWidth: '480px',
+                            transform: hovered ? 'translateY(0)' : 'translateY(6px)',
+                            transition: 'transform 0.45s ease 0.05s',
+                        }}
+                    >
+                        {project.synopsis}
+                    </p>
+                </div>
+
+                {/* Bottom: genre + title + director + watch */}
+                <div className="flex items-end justify-between gap-4">
                     <div>
                         <p
-                            className="text-[8px] sm:text-[9px] uppercase tracking-[0.35em] mb-1 sm:mb-2"
-                            style={{ color: 'rgba(201,168,76,0.6)', fontFamily: 'var(--font-body, "EB Garamond", serif)' }}
+                            className="text-[8px] uppercase tracking-[0.3em] mb-1"
+                            style={{ color: 'rgba(201,168,76,0.55)', fontFamily: 'var(--font-body, "EB Garamond", serif)' }}
                         >
-                            {project.year} · {project.duration}
+                            {project.genre}
                         </p>
                         <h3
                             className="font-black uppercase leading-none"
@@ -205,20 +243,41 @@ const VideoCard = ({ project, onOpen, isDouble }) => {
                         >
                             {project.title}
                         </h3>
+                        <p
+                            className="text-[9px] mt-1"
+                            style={{ color: 'rgba(245,240,232,0.4)', fontFamily: 'var(--font-body, "EB Garamond", serif)' }}
+                        >
+                            Dir. {project.director}
+                        </p>
                     </div>
 
-                    {/* Watch on YouTube hint */}
-                    <div
-                        className="flex items-center gap-2 transition-all duration-300"
-                        style={{ opacity: hovered ? 1 : 0.7, transform: hovered ? 'translateY(0)' : 'translateY(0)' }}
-                    >
+                    {/* Play / Watch button */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        <div
+                            className="flex items-center justify-center"
+                            style={{
+                                width: '42px',
+                                height: '42px',
+                                border: '1px solid rgba(201,168,76,0.7)',
+                                borderRadius: '50%',
+                                background: 'rgba(9,8,6,0.5)',
+                                backdropFilter: 'blur(8px)',
+                            }}
+                        >
+                            <div style={{
+                                width: 0, height: 0,
+                                borderTop: '7px solid transparent',
+                                borderBottom: '7px solid transparent',
+                                borderLeft: '13px solid #c9a84c',
+                                marginLeft: '3px',
+                            }} />
+                        </div>
                         <span
-                            className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em]"
+                            className="hidden sm:inline text-[8px] uppercase tracking-[0.35em]"
                             style={{ color: '#c9a84c', fontFamily: 'var(--font-body, "EB Garamond", serif)' }}
                         >
                             Watch
                         </span>
-                        <div className="h-px w-4 sm:w-6" style={{ background: '#c9a84c', opacity: 0.6 }} />
                     </div>
                 </div>
             </div>
@@ -249,7 +308,6 @@ const YoutubeModal = ({ project, onClose }) => {
                 style={{ maxWidth: '1000px' }}
                 onClick={e => e.stopPropagation()}
             >
-                {/* Header Row: Info & Close */}
                 <div className="mb-4 flex items-start justify-between gap-4">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <span
@@ -296,7 +354,6 @@ const YoutubeModal = ({ project, onClose }) => {
                     </button>
                 </div>
 
-                {/* YouTube iframe */}
                 <div
                     className="relative w-full overflow-hidden"
                     style={{
@@ -307,7 +364,7 @@ const YoutubeModal = ({ project, onClose }) => {
                     }}
                 >
                     <iframe
-                        src={`https://www.youtube.com/embed/${project.youtube}?autoplay=1&rel=0&modestbranding=1`}
+                        src={`https://www.youtube.com/embed/${project.youtube}?autoplay=1&mute=1&rel=0&modestbranding=1`}
                         title={project.title}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -319,7 +376,6 @@ const YoutubeModal = ({ project, onClose }) => {
         </div>
     );
 };
-
 
 const Projects = () => {
     const [activeProject, setActiveProject] = useState(null);
@@ -343,7 +399,6 @@ const Projects = () => {
                 id="projects"
                 className="relative w-full min-h-screen bg-(--color-bg,#1F4959) py-24 overflow-hidden"
             >
-                {/* Ambient */}
                 <div
                     className="absolute inset-0 pointer-events-none"
                     style={{
@@ -352,8 +407,6 @@ const Projects = () => {
                 />
 
                 <div className="container mx-auto px-6 sm:px-12 lg:px-24 relative z-10">
-
-                    {/* Header */}
                     <div
                         className="mb-16"
                         style={{
@@ -411,7 +464,6 @@ const Projects = () => {
                         />
                     </div>
 
-                    {/* Rows */}
                     <div className="flex flex-col gap-5">
                         {rows.map((row, rowIndex) => (
                             <div
@@ -437,7 +489,6 @@ const Projects = () => {
                 </div>
             </section>
 
-            {/* Modal */}
             {activeProject && (
                 <YoutubeModal
                     project={activeProject}
