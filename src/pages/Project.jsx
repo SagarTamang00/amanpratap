@@ -82,7 +82,7 @@ const VideoCard = ({ project, onOpen, isDouble }) => {
                 }`}
             style={{
                 borderRadius: '16px',
-                background: '#0d0b09',
+                background: 'transparent',
                 border: '1px solid rgba(201,168,76,0.12)',
                 boxShadow: hovered
                     ? '0 24px 64px rgba(0,0,0,0.8), 0 0 40px rgba(201,168,76,0.08)'

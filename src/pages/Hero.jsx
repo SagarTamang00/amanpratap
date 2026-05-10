@@ -58,8 +58,7 @@ const Hero = () => {
   return (
     <>
       <section
-        className="relative w-full h-screen overflow-hidden"
-        style={{ background: 'var(--color-bg-section' }}
+        className="relative w-full h-screen overflow-hidden bg-transparent"
       >
 {/* ── LEFT: Name block ── */}
 <div className="absolute inset-0 z-20 flex flex-col justify-center pointer-events-none mt-12 md:mt-0">
@@ -77,14 +76,14 @@ style={{
       <div className="flex flex-wrap md:flex-nowrap gap-x-[0.2em] gap-y-[0.1em] drop-shadow-xl mb-2 md:mb-4">
         <span
           className={`animate__animated ${isLoaded ? 'animate__bounceInLeft' : 'opacity-0'} block`}
-          style={{ color: 'var(--color-text,#1B2A4A)', animationDelay: '0.3s' }}
+          style={{ color: 'var(--color-text,#22D3EE)', animationDelay: '0.3s' }}
           data-cursor="large"
         >
           Aman
         </span>
         <span
           className={`animate__animated ${isLoaded ? 'animate__bounceInRight' : 'opacity-0'} block`}
-          style={{ color: 'var(--color-text,#1B2A4A)', animationDelay: '0.5s' }}
+          style={{ color: 'var(--color-text,#22D3EE)', animationDelay: '0.5s' }}
           data-cursor="large"
         >
           Pratap
@@ -98,7 +97,7 @@ style={{
     } block`}
     style={{
       color: 'transparent',
-      WebkitTextStroke: '2px var(--color-text,#1B2A4A)',
+      WebkitTextStroke: '2px var(--color-text,#22D3EE)',
       letterSpacing: '0.04em',
       animationDelay: '0.7s',
     }}
@@ -117,12 +116,12 @@ style={{
       <svg width="24" height="8" viewBox="0 0 40 12" fill="none" xmlns="http://www.w3.org/2000/svg"
         className="animate-pulse shrink-0 md:w-9 md:h-3">
         <path d="M0 6H38M38 6L33 1M38 6L33 11"
-          stroke="var(--color-accent,#E8A020)" strokeWidth="2"
+          stroke="var(--color-accent,#A855F7)" strokeWidth="2"
           strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <h2
         className="text-[0.65rem] sm:text-xs md:text-base uppercase font-semibold tracking-[0.15em] sm:tracking-[0.25em] md:tracking-[0.35em]"
-        style={{ color: 'var(--color-accent,#E8A020)', fontFamily: '"League Spartan", sans-serif' }}
+        style={{ color: 'var(--color-accent,#A855F7)', fontFamily: '"League Spartan", sans-serif' }}
       >
         Nepali Film Director
       </h2>
@@ -131,7 +130,7 @@ style={{
     {/* Gold rule */}
     <div
       className={`h-px mt-4 md:mt-6 mb-6 transition-all duration-1000 ease-out delay-700 ${isLoaded ? 'opacity-100 w-24 md:w-40' : 'opacity-0 w-0'}`}
-      style={{ background: 'linear-gradient(to right, var(--color-accent,#E8A020), transparent)' }}
+      style={{ background: 'linear-gradient(to right, var(--color-accent,#A855F7), transparent)' }}
     />
 
   </div>
@@ -146,13 +145,13 @@ style={{
         >
           <span
             className="text-[0.48rem] uppercase tracking-[0.4em]"
-            style={{ color: 'var(--color-accent,#c9a84c)', fontFamily: 'var(--font-heading,sans-serif)' }}
+            style={{ color: 'var(--color-accent,#C084FC)', fontFamily: 'var(--font-heading,sans-serif)' }}
           >
             Scroll
           </span>
           <div
             className="w-px h-9 animate-pulse"
-            style={{ background: 'linear-gradient(to bottom, var(--color-accent,#c9a84c), transparent)' }}
+            style={{ background: 'linear-gradient(to bottom, var(--color-accent,#C084FC), transparent)' }}
           />
         </div>
 

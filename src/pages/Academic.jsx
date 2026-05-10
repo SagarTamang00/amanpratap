@@ -83,10 +83,10 @@ function playReelClick() {
 // ── Meta chip ────────────────────────────────────────────────────────────────
 const MetaItem = ({ label, value }) => (
   <div className="flex flex-col min-w-0">
-    <p className="text-[#E8A020] text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold mb-1">
+    <p className="text-[#A855F7] text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold mb-1">
       {label}
     </p>
-    <p className="text-[#1B2A4A] text-xs sm:text-sm font-bold break-words">
+    <p className="text-[#22D3EE] text-xs sm:text-sm font-bold break-words">
       {value}
     </p>
   </div>
@@ -225,7 +225,7 @@ const ProjectorModel = () => {
       </mesh>
       <mesh position={[-1.36, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.28, 0.28, 0.05, 32]} />
-        <meshBasicMaterial color="#E8A020" />
+        <meshBasicMaterial color="#A855F7" />
       </mesh>
       <primitive object={targetObj} />
       <SpotLight
@@ -239,7 +239,7 @@ const ProjectorModel = () => {
         attenuation={4}
         anglePower={2}
         intensity={25}
-        color="#E8A020"
+        color="#A855F7"
         opacity={1}
       />
       <group position={[-0.3, 1.3, 0.25]} ref={reel1Ref}>
@@ -374,29 +374,29 @@ const Academic = () => {
   return (
     <section
       ref={containerRef}
-      className="w-full bg-[#F5EFE0] overflow-hidden"
+      className="w-full bg-transparent overflow-hidden"
       style={{ isolation: "isolate" }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
       {/* HEADER */}
       <div className="flex flex-col items-center justify-center text-center px-4 pt-24 pb-12 relative z-20">
-        <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-[#374151] mb-4 font-bold">
+        <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-[#94A3B8] mb-4 font-bold">
           Portfolio
         </p>
         <h2
-          className="font-black text-[#1B2A4A] leading-tight"
+          className="font-black text-[#22D3EE] leading-tight"
           style={{ fontSize: "clamp(32px, 7vw, 72px)" }}
         >
-          Academic <span className="text-[#E8A020]">Journey</span>
+          Academic <span className="text-[#A855F7]">Journey</span>
         </h2>
-        <p className="mt-5 text-[10px] tracking-[0.3em] text-[#374151] uppercase font-bold">
+        <p className="mt-5 text-[10px] tracking-[0.3em] text-[#94A3B8] uppercase font-bold">
           Cinematic Slideshow
         </p>
       </div>
 
       {/* STACK WRAPPER */}
-      <div className="stack-wrapper relative h-screen w-full bg-[#F5EFE0]">
+      <div className="stack-wrapper relative h-screen w-full bg-transparent">
 
         {/* 3D Canvas */}
         <div className="absolute inset-0 z-0 pointer-events-none">
@@ -413,7 +413,7 @@ const Academic = () => {
             style={{ opacity: 0, pointerEvents: index === activeIndex ? "auto" : "none" }}
           >
             <div className="w-full will-change-transform" style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
-              <div className="card-shell overflow-hidden rounded-[2rem] border border-[#E8A020]/30 bg-white shadow-[0_0_80px_rgba(232,160,32,0.15)] relative">
+              <div className="card-shell overflow-hidden rounded-[2rem] border border-[#A855F7]/30 bg-white shadow-[0_0_80px_rgba(168,85,247,0.15)] relative">
 
                 {/* IMAGE */}
                 <div className="relative overflow-hidden" style={{ height: "clamp(200px, 28vw, 300px)" }}>
@@ -425,24 +425,24 @@ const Academic = () => {
                       backgroundPosition: "center",
                     }}
                   />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,160,32,0.15)_0%,rgba(255,255,255,0.4)_100%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.15)_0%,rgba(255,255,255,0.4)_100%)]" />
                 </div>
 
                 {/* BODY */}
                 <div className="card-content bg-white p-6 sm:p-8">
                   <div className="flex flex-col gap-6">
                     <div>
-                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[#E8A020] mb-3 font-bold">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[#A855F7] mb-3 font-bold">
                         {item.level}
                       </p>
                       <h2
-                        className="font-black text-[#1B2A4A] leading-tight mb-4"
+                        className="font-black text-[#22D3EE] leading-tight mb-4"
                         style={{ fontSize: "clamp(24px, 3vw, 42px)" }}
                       >
                         {item.title}
                       </h2>
-                      <div className="w-12 h-[2px] bg-[#E8A020] mb-4" />
-                      <p className="text-[#374151] text-sm leading-relaxed max-w-xl">
+                      <div className="w-12 h-[2px] bg-[#A855F7] mb-4" />
+                      <p className="text-[#94A3B8] text-sm leading-relaxed max-w-xl">
                         {item.description}
                       </p>
                     </div>
@@ -465,7 +465,7 @@ const Academic = () => {
           {/* Prev button */}
           <button
             onClick={goPrev}
-            className="w-10 h-10 rounded-full border-2 border-[#E8A020]/50 flex items-center justify-center text-[#E8A020] hover:bg-[#E8A020]/10 transition-all"
+            className="w-10 h-10 rounded-full border-2 border-[#A855F7]/50 flex items-center justify-center text-[#A855F7] hover:bg-[#A855F7]/10 transition-all"
             aria-label="Previous"
           >
             ←
@@ -482,7 +482,7 @@ const Academic = () => {
                   width: i === activeIndex ? 26 : 8,
                   height: 8,
                   borderRadius: 4,
-                  background: i === activeIndex ? "#E8A020" : "#1B2A4A22",
+                  background: i === activeIndex ? "#A855F7" : "#22D3EE22",
                   border: "none",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
@@ -494,7 +494,7 @@ const Academic = () => {
           {/* Next button */}
           <button
             onClick={goNext}
-            className="w-10 h-10 rounded-full border-2 border-[#E8A020]/50 flex items-center justify-center text-[#E8A020] hover:bg-[#E8A020]/10 transition-all"
+            className="w-10 h-10 rounded-full border-2 border-[#A855F7]/50 flex items-center justify-center text-[#A855F7] hover:bg-[#A855F7]/10 transition-all"
             aria-label="Next"
           >
             →
@@ -503,13 +503,13 @@ const Academic = () => {
 
         {/* Progress bar */}
         <div className="absolute bottom-4 left-0 w-full md:w-[60%] lg:w-[50%] px-4 z-30">
-          <div className="w-full h-[2px] rounded-full overflow-hidden" style={{ background: "#1B2A4A11" }}>
+          <div className="w-full h-[2px] rounded-full overflow-hidden" style={{ background: "#22D3EE11" }}>
             <div
               key={`pb-${activeIndex}`}
               style={{
                 height: "100%",
                 borderRadius: 9999,
-                background: "linear-gradient(90deg, #1B2A4A, #E8A020)",
+                background: "linear-gradient(90deg, #22D3EE, #A855F7)",
                 animation: "pbFill 4s linear forwards",
               }}
             />
